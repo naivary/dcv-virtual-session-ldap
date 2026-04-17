@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
+	"github.com/naivary/dcv-virtual-session-ldap/dcv"
 )
 
 type flagOpts struct {
@@ -53,9 +54,13 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		_ = users
+		for _, user := range users {
+			err = dcv.CreateVirtualSessionFromUsername(user)
+			if err != nil {
+				return err
+			}
+		}
 	}
-
 	return nil
 }
 
@@ -65,7 +70,7 @@ func listDCVMembers(conn *ldap.Conn, baseDN, groupDN string) ([]string, error) {
 		timeLimit = 0
 		typesOnly = false
 	)
-	filter := ""
+	filter := fmt.Sprintf("(&(objectClass=user)(memberOf=%s,%s))", groupDN, baseDN)
 	attrs := []string{}
 	req := ldap.NewSearchRequest(
 		baseDN,
@@ -83,9 +88,9 @@ func listDCVMembers(conn *ldap.Conn, baseDN, groupDN string) ([]string, error) {
 	}
 	users := make([]string, 0, len(sr.Entries))
 	for _, e := range sr.Entries {
-		userLogonName := e.GetAttributeValue("User logon name")
+		userLogonName := e.GetAttributeValue("sAMAccountName")
 		if userLogonName == "" {
-			return nil, fmt.Errorf("logon name is empty: %v", e.DN)
+			return nil, fmt.Errorf("undefined sAMAccountName: %s", e.DN)
 		}
 		users = append(users, userLogonName)
 	}
