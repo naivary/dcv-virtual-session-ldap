@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -51,6 +52,7 @@ func run() error {
 
 	ticker := time.NewTicker(opts.period)
 	defer ticker.Stop()
+	slog.Info("Successfully started DCV Virtual Session Manager!", "period", opts.period)
 	for range ticker.C {
 		users, err := listDCVMembers(conn, opts.baseDN, opts.groupDN)
 		if err != nil {
