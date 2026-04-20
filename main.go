@@ -47,13 +47,13 @@ func (f *flagOpts) isValid() error {
 		return errors.New("missing LDAP URL (-url): e.g. -url ldap://localhost:389")
 	}
 	if !hasValidLDAPScheme(f.ldapURL) {
-		return fmt.Errorf("invalid LDAP URL scheme in %q (-url): must begin with one of ldap://, ldaps://, ldapi://, cldap://", f.ldapURL)
+		return fmt.Errorf("invalid LDAP URL scheme in %q (-url): supported schemas are ldap://, ldaps://, ldapi://, cldap://", f.ldapURL)
 	}
 	if f.baseDN == "" {
 		return errors.New("missing base DN (-bdn): e.g. -bdn dc=example,dc=com")
 	}
-	if f.groupDN != "" && !strings.HasSuffix(f.groupDN, f.baseDN) {
-		return fmt.Errorf("group DN %q (-gdn) does not appear to be under base DN %q (-bdn)", f.groupDN, f.baseDN)
+	if f.groupDN == "" {
+		return errors.New("missing group DN (-gdn): e.g. -gdn CN=dcv,OU=Users,OU=dev-gigaservice")
 	}
 	if f.username == "" {
 		return errors.New("username missing (-user)")
