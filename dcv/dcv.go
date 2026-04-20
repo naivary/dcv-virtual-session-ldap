@@ -8,18 +8,10 @@ import (
 )
 
 type VirtualSession struct {
-	ID    string `json:"id"`
+	ID string `json:"id"`
+	// Name of the virtual session
 	Name  string `json:"name"`
 	Owner string `json:"owner"`
-}
-
-func CreateVirtualSessionFromUsername(username string) error {
-	v := VirtualSession{
-		ID:    username,
-		Name:  username,
-		Owner: username,
-	}
-	return createVirtualSession(&v)
 }
 
 // PruneVirtualSessions is closing all sessions for which no owner
@@ -51,7 +43,7 @@ func deleteVirtualSession(id string) error {
 	return cmd.Run()
 }
 
-func createVirtualSession(s *VirtualSession) error {
+func CreateVirtualSession(s *VirtualSession) error {
 	isCreated, err := isVirtualSessionCreated(s.ID)
 	if err != nil {
 		return err
