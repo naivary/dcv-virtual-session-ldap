@@ -10,6 +10,8 @@ import (
 	"github.com/naivary/dcv-virtual-session-ldap/dcv"
 )
 
+const LDAPAttrLogonName = "sAMAccountName"
+
 type flagOpts struct {
 	period   time.Duration
 	ldapURL  string
@@ -88,9 +90,9 @@ func listDCVMembers(conn *ldap.Conn, baseDN, groupDN string) ([]string, error) {
 	}
 	users := make([]string, 0, len(sr.Entries))
 	for _, e := range sr.Entries {
-		userLogonName := e.GetAttributeValue("sAMAccountName")
+		userLogonName := e.GetAttributeValue(LDAPAttrLogonName)
 		if userLogonName == "" {
-			return nil, fmt.Errorf("undefined sAMAccountName: %s", e.DN)
+			return nil, fmt.Errorf("undefined logon name: %s", e.DN)
 		}
 		users = append(users, userLogonName)
 	}
