@@ -11,7 +11,6 @@ type VirtualSession struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Owner string `json:"owner"`
-	User  string `json:"user"`
 }
 
 func CreateVirtualSessionFromUsername(username string) error {
@@ -19,7 +18,6 @@ func CreateVirtualSessionFromUsername(username string) error {
 		ID:    username,
 		Name:  username,
 		Owner: username,
-		User:  username,
 	}
 	return createVirtualSession(&v)
 }
@@ -66,7 +64,6 @@ func createVirtualSession(s *VirtualSession) error {
 		"create-session",
 		"--type", "virtual",
 		"--name", s.Name,
-		"--user", s.User,
 		"--owner", s.Owner,
 		s.ID,
 	)
