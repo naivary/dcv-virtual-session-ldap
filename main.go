@@ -78,7 +78,7 @@ func run() error {
 				return err
 			}
 		}
-		slog.Info("Successfully created virtual session for all members!")
+		slog.Info("Successfully created virtual sessions for all members!")
 	}
 	return nil
 }
