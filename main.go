@@ -58,6 +58,7 @@ func run() error {
 	defer ticker.Stop()
 	slog.Info("Successfully started DCV Virtual Session Manager!", "period", opts.period)
 	for range ticker.C {
+		slog.Info("Checking LDAP for new DCV members...")
 		users, err := listDCVMembers(conn, opts.baseDN, opts.groupDN)
 		if err != nil {
 			return err
@@ -68,11 +69,16 @@ func run() error {
 				ID:    name,
 				Owner: email,
 			}
+			err = dcv.PruneVirtualSessions(users)
+			if err != nil {
+				return err
+			}
 			err = dcv.CreateVirtualSession(&vs)
 			if err != nil {
 				return err
 			}
 		}
+		slog.Info("Successfully created virtual session for all members!")
 	}
 	return nil
 }
