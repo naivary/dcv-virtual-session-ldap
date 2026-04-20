@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -26,6 +27,46 @@ type flagOpts struct {
 	baseDN   string
 }
 
+func hasValidLDAPScheme(url string) bool {
+	supportedSchemes := []string{
+		"ldap://",
+		"ldaps://",
+		"ldapi://",
+		"cldap://",
+	}
+	for _, scheme := range supportedSchemes {
+		if strings.HasPrefix(url, scheme) {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *flagOpts) isValid() error {
+	if f.ldapURL == "" {
+		return errors.New("missing LDAP URL (-url): e.g. -url ldap://localhost:389")
+	}
+	if !hasValidLDAPScheme(f.ldapURL) {
+		return fmt.Errorf("invalid LDAP URL scheme in %q (-url): must begin with one of ldap://, ldaps://, ldapi://, cldap://", f.ldapURL)
+	}
+	if f.baseDN == "" {
+		return errors.New("missing base DN (-bdn): e.g. -bdn dc=example,dc=com")
+	}
+	if f.groupDN != "" && !strings.HasSuffix(f.groupDN, f.baseDN) {
+		return fmt.Errorf("group DN %q (-gdn) does not appear to be under base DN %q (-bdn)", f.groupDN, f.baseDN)
+	}
+	if f.username == "" {
+		return errors.New("username missing (-user)")
+	}
+	if f.password == "" {
+		return errors.New("password missing (-password)")
+	}
+	if f.period <= 0 {
+		return fmt.Errorf("invalid period %q (-period): must be a positive duration, e.g. -period 5m", f.period)
+	}
+	return nil
+}
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "err: %s\n", err)
@@ -42,6 +83,9 @@ func run() error {
 	flag.StringVar(&opts.groupDN, "gdn", "", "Group DN users have to be a member of to create a virtual session for.")
 	flag.StringVar(&opts.baseDN, "bdn", "", "Base DN of the LDAP.")
 	flag.Parse()
+	if err := opts.isValid(); err != nil {
+		return err
+	}
 
 	conn, err := ldap.DialURL(opts.ldapURL)
 	if err != nil {
