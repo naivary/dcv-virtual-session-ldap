@@ -66,7 +66,6 @@ func run() error {
 			name, _, _ := strings.Cut(email, "@")
 			vs := dcv.VirtualSession{
 				ID:    name,
-				Name:  name,
 				Owner: email,
 			}
 			err = dcv.CreateVirtualSession(&vs)
