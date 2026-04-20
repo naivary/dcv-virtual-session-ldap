@@ -24,8 +24,8 @@ func CreateVirtualSessionFromUsername(username string) error {
 	return createVirtualSession(&v)
 }
 
-// PruneVirtualSessions is closing all virtual sessions for which no owner
-// can be found in `users`.
+// PruneVirtualSessions is closing all sessions for which no owner
+// can be found.
 func PruneVirtualSessions(users []string) error {
 	sessions, err := listVirtualSessions()
 	if err != nil {
@@ -86,10 +86,7 @@ func listVirtualSessions() ([]VirtualSession, error) {
 		return nil, err
 	}
 	err = json.Unmarshal(data, &sessions)
-	if err != nil {
-		return nil, err
-	}
-	return sessions, nil
+	return sessions, err
 }
 
 func isVirtualSessionCreated(id string) (bool, error) {
